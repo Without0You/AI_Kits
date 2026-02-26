@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 智能识别系统</title>
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Helvetica Neue', Helvetica, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 30px 20px;
+        }
+
+        #app {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        /* 头部样式 */
+        .app-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .app-header h1 {
+            font-size: 2.5em;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+            margin-bottom: 10px;
+        }
+
+        .app-header p {
+            color: rgba(255,255,255,0.9);
+            font-size: 1.1em;
+        }
+
+        /* 卡片样式 */
+        .section-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .section-title h2 {
+            font-size: 1.5em;
+            color: #333;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .section-title .title-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 20px;
+        }
+
+        /* 输入框样式 */
+        .input-wrapper {
+            margin-bottom: 15px;
+        }
+
+        .input-label {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .input-label i {
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        .el-input__inner, .el-textarea__inner {
+            border-radius: 12px !important;
+            border: 2px solid #e0e0e0 !important;
+            transition: all 0.3s ease !important;
+            font-size: 15px !important;
+            padding: 12px 15px !important;
+        }
+
+        .el-input__inner:focus, .el-textarea__inner:focus {
+            border-color: #667eea !important;
+            box-shadow: 0 0 0 3px rgba(102,126,234,0.1) !important;
+        }
+
+        .el-textarea__inner {
+            min-height: 100px !important;
+        }
+
+        /* 上传组件样式 */
+        .upload-demo {
+            margin-bottom: 15px;
+        }
+
+        .el-upload-dragger {
+            width: 100%;
+            height: 180px;
+            border: 2px dashed #d0d0d0;
+            border-radius: 16px !important;
+            background: #fafafa;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .el-upload-dragger:hover {
+            border-color: #667eea !important;
+            background: #f5f5ff;
+            transform: scale(1.02);
+        }
+
+        .el-upload-dragger .el-icon-upload {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 10px;
+            line-height: 1;
+        }
+
+        .el-upload__text {
+            color: #666;
+            font-size: 16px;
+            margin-bottom: 8px;
+        }
+
+        .el-upload__text em {
+            color: #667eea;
+            font-style: normal;
+            font-weight: 500;
+        }
+
+        .el-upload__tip {
+            color: #999;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* 按钮样式 */
+        .el-button {
+            border-radius: 25px !important;
+            padding: 12px 30px !important;
+            font-size: 16px !important;
+            transition: all 0.3s ease !important;
+            border: none !important;
+        }
+
+        .el-button--primary {
+            background: linear-gradient(135deg, #667eea, #764ba2) !important;
+            color: white !important;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .el-button--primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102,126,234,0.4) !important;
+        }
+
+        .el-button--primary:active {
+            transform: translateY(0);
+        }
+
+        /* 结果区域样式 */
+        .result-area {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .file-info {
+            display: flex;
+            align-items: center;
+            margin-top: 10px;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .file-info i {
+            color: #667eea;
+            margin-right: 8px;
+        }
+
+        /* 加载动画 */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding: 15px;
+            }
+
+            .section-card {
+                padding: 20px;
+            }
+
+            .app-header h1 {
+                font-size: 2em;
+            }
+
+            .el-upload-dragger {
+                height: 150px;
+            }
+        }
+
+        /* 状态标签 */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .status-badge.success {
+            background: #e1f7e3;
+            color: #2ecc71;
+        }
+
+        .status-badge.waiting {
+            background: #fff3e0;
+            color: #f39c12;
+        }
+
+        /* 美化滚动条 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <!-- 头部区域 -->
+    <div class="app-header">
+        <h1>✨ AI 智能识别系统</h1>
+        <p>文本纠错 · 图像识别 · 文字识别</p>
+    </div>
+
+    <!-- NLP纠错卡片 -->
+    <div class="section-card">
+        <div class="section-title">
+            <div class="title-icon">📝</div>
+            <h2>文本纠错</h2>
+            <span class="status-badge" :class="nlpStatus ? 'success' : 'waiting'">
+                    {{ nlpStatus ? '已处理' : '待处理' }}
+                </span>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-label">
+                <i class="el-icon-edit"></i>
+                <span>输入文本</span>
+            </div>
+            <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="请输入需要纠错的文本内容..."
+                    v-model="nlp_input"
+                    clearable
+                    @input="updateNlpStatus">
+            </el-input>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-label">
+                <i class="el-icon-document"></i>
+                <span>纠错结果</span>
+            </div>
+            <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="纠错后的结果将显示在这里..."
+                    v-model="nlp_output"
+                    readonly>
+            </el-input>
+        </div>
+
+        <el-button
+                type="primary"
+                @click="nlp_correction"
+                :loading="nlpLoading"
+                :disabled="!nlp_input.trim()">
+            <span v-if="!nlpLoading">🔍 开始纠错</span>
+            <span v-else>
+                    <span class="loading-spinner"></span>
+                    处理中...
+                </span>
+        </el-button>
+    </div>
+
+    <!-- 图像识别卡片 -->
+    <div class="section-card">
+        <div class="section-title">
+            <div class="title-icon">🖼️</div>
+            <h2>图像识别</h2>
+            <span class="status-badge" :class="imgStatus ? 'success' : 'waiting'">
+                    {{ imgStatus ? '已识别' : '待识别' }}
+                </span>
+        </div>
+
+        <el-upload
+                class="upload-demo"
+                drag
+                action="http://127.0.0.1:8080/img"
+                :on-success="imgUploadSuccess"
+                :on-error="imgUploadError"
+                :before-upload="beforeImgUpload"
+                :on-progress="imgUploadProgress"
+                accept="image/jpeg,image/png"
+                multiple>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">
+                <i class="el-icon-info" style="color: #667eea;"></i>
+                支持jpg/png格式，单个文件不超过500kb
+            </div>
+        </el-upload>
+
+        <!-- 文件上传进度 -->
+        <div v-if="imgUploading" class="file-info">
+            <i class="el-icon-loading"></i>
+            <span>正在上传: {{ imgFileName }}</span>
+        </div>
+
+        <!-- 已上传文件信息 -->
+        <div v-if="imgFileName && !imgUploading" class="file-info">
+            <i class="el-icon-success" style="color: #2ecc71;"></i>
+            <span>已上传: {{ imgFileName }}</span>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-label">
+                <i class="el-icon-picture"></i>
+                <span>识别结果</span>
+            </div>
+            <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="图像识别结果将显示在这里..."
+                    v-model="img_output"
+                    readonly>
+            </el-input>
+        </div>
+    </div>
+
+    <!-- 文字识别卡片 -->
+    <div class="section-card">
+        <div class="section-title">
+            <div class="title-icon">📄</div>
+            <h2>文字识别</h2>
+            <span class="status-badge" :class="wordStatus ? 'success' : 'waiting'">
+                    {{ wordStatus ? '已识别' : '待识别' }}
+                </span>
+        </div>
+
+        <el-upload
+                class="upload-demo"
+                drag
+                action="http://127.0.0.1:8080/word"
+                :on-success="wordUploadSuccess"
+                :on-error="wordUploadError"
+                :before-upload="beforeWordUpload"
+                :on-progress="wordUploadProgress"
+                accept="image/jpeg,image/png"
+                multiple>
+            <i class="el-icon-upload"></i>
+            <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+            <div class="el-upload__tip" slot="tip">
+                <i class="el-icon-info" style="color: #667eea;"></i>
+                支持jpg/png格式，单个文件不超过500kb
+            </div>
+        </el-upload>
+
+        <!-- 文件上传进度 -->
+        <div v-if="wordUploading" class="file-info">
+            <i class="el-icon-loading"></i>
+            <span>正在上传: {{ wordFileName }}</span>
+        </div>
+
+        <!-- 已上传文件信息 -->
+        <div v-if="wordFileName && !wordUploading" class="file-info">
+            <i class="el-icon-success" style="color: #2ecc71;"></i>
+            <span>已上传: {{ wordFileName }}</span>
+        </div>
+
+        <div class="input-wrapper">
+            <div class="input-label">
+                <i class="el-icon-document-copy"></i>
+                <span>识别结果</span>
+            </div>
+            <el-input
+                    type="textarea"
+                    :rows="3"
+                    placeholder="文字识别结果将显示在这里..."
+                    v-model="word_output"
+                    readonly>
+            </el-input>
+        </div>
+    </div>
+</div>
+</body>
+
+<script src="https://cdn.bootcss.com/vue/2.5.16/vue.min.js"></script>
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    new Vue({
+        el: '#app',
+        data: {
+            // NLP相关
+            nlp_input: "",
+            nlp_output: "",
+            nlpLoading: false,
+            nlpStatus: false,
+
+            // 图像识别相关
+            img_output: "",
+            imgFileName: "",
+            imgUploading: false,
+            imgStatus: false,
+
+            // 文字识别相关
+            word_output: "",
+            wordFileName: "",
+            wordUploading: false,
+            wordStatus: false
+        },
+        methods: {
+            // NLP纠错
+            nlp_correction() {
+                if (!this.nlp_input.trim()) {
+                    this.$message({
+                        message: '请输入需要纠错的文本',
+                        type: 'warning',
+                        duration: 2000
+                    });
+                    return;
+                }
+
+                this.nlpLoading = true;
+
+                axios.get("http://127.0.0.1:8080/nlp", {
+                    params: {
+                        text: this.nlp_input
+                    },
+                    timeout: 10000
+                })
+                    .then(res => {
+                        this.nlpLoading = false;
+                        this.nlp_output = res.data || "处理完成";
+                        this.nlpStatus = true;
+
+                        this.$message({
+                            message: '纠错完成！',
+                            type: 'success',
+                            duration: 2000
+                        });
+                    })
+                    .catch(error => {
+                        this.nlpLoading = false;
+                        console.error('NLP错误:', error);
+
+                        if (error.message.includes('CORS')) {
+                            this.$message.error('CORS错误，请在后端添加CORS支持');
+                        } else if (error.request) {
+                            this.$message.error('无法连接到服务器，请确保后端服务已启动');
+
+                            // 演示模式
+                            if (this.nlp_input.includes('人工只能')) {
+                                this.nlp_output = this.nlp_input.replace('人工只能', '人工智能');
+                                this.nlpStatus = true;
+                            }
+                        }
+                    });
+            },
+
+            updateNlpStatus() {
+                this.nlpStatus = false;
+            },
+
+            // 图像上传相关
+            beforeImgUpload(file) {
+                const isImage = file.type === 'image/jpeg' || file.type === 'image/png';
+                const isLt500K = file.size / 1024 < 500;
+
+                if (!isImage) {
+                    this.$message.error('只能上传jpg/png格式的图片！');
+                    return false;
+                }
+                if (!isLt500K) {
+                    this.$message.error('图片大小不能超过500kb！');
+                    return false;
+                }
+
+                this.imgUploading = true;
+                this.imgFileName = file.name;
+                this.imgStatus = false;
+                return true;
+            },
+
+            imgUploadProgress(event, file, fileList) {
+                // 上传进度处理
+                console.log('上传进度:', file.percentage);
+            },
+
+            imgUploadSuccess(res, file, fileList) {
+                this.imgUploading = false;
+                this.img_output = res || "图像识别完成";
+                this.imgStatus = true;
+
+                this.$message({
+                    message: '图像上传成功！',
+                    type: 'success',
+                    duration: 2000
+                });
+                console.log('图像识别结果:', res);
+            },
+
+            imgUploadError(err, file, fileList) {
+                this.imgUploading = false;
+                this.imgStatus = false;
+                console.error('图像上传失败:', err);
+                this.$message.error('图像上传失败: ' + (err.message || '未知错误'));
+            },
+
+            // 文字上传相关
+            beforeWordUpload(file) {
+                const isImage = file.type === 'image/jpeg' || file.type === 'image/png';
+                const isLt500K = file.size / 1024 < 500;
+
+                if (!isImage) {
+                    this.$message.error('只能上传jpg/png格式的图片！');
+                    return false;
+                }
+                if (!isLt500K) {
+                    this.$message.error('图片大小不能超过500kb！');
+                    return false;
+                }
+
+                this.wordUploading = true;
+                this.wordFileName = file.name;
+                this.wordStatus = false;
+                return true;
+            },
+
+            wordUploadProgress(event, file, fileList) {
+                // 上传进度处理
+                console.log('上传进度:', file.percentage);
+            },
+
+            wordUploadSuccess(res, file, fileList) {
+                this.wordUploading = false;
+                this.word_output = res || "文字识别完成";
+                this.wordStatus = true;
+
+                this.$message({
+                    message: '文字识别上传成功！',
+                    type: 'success',
+                    duration: 2000
+                });
+                console.log('文字识别结果:', res);
+            },
+
+            wordUploadError(err, file, fileList) {
+                this.wordUploading = false;
+                this.wordStatus = false;
+                console.error('文字识别上传失败:', err);
+                this.$message.error('文字识别上传失败: ' + (err.message || '未知错误'));
+            }
+        },
+
+        mounted() {
+            this.$message({
+                message: '欢迎使用AI智能识别系统',
+                type: 'success',
+                duration: 3000
+            });
+
+            console.log('应用已启动，后端地址: http://127.0.0.1:8080');
+        }
+    })
+</script>
+</html>
